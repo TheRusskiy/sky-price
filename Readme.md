@@ -16,3 +16,4 @@ SkyScanner is careful about protecting against automated scripts, so a little wo
 * Click on it and select `Copy` -> `Copy as cURL`
 * 1. Run `yarn start <INSERT COPIED COMMAND>`, 
   2. ...Or create a file called `request.curl`, paste the contents there and run `yarn start`.
+* Each time you run the script, it picks 20 random countries, so you can run multiple times
