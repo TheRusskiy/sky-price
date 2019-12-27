@@ -2,3 +2,4 @@
 tmp/
 node_modules/
 *.iml
+request.curl
