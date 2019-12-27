@@ -10,12 +10,12 @@ const FILE_PATH = './request.curl'
 
 let commandComponents
 
-if (fs.existsSync(FILE_PATH)) {
+if (process.argv.length > 2) {
+  commandComponents = process.argv.slice(2)
+} else if (fs.existsSync(FILE_PATH)) {
   const rawCurl = fs.readFileSync(FILE_PATH, { encoding: 'utf8' })
 
   commandComponents = ShellQuote.parse(rawCurl)
-} else if (process.argv.length > 2) {
-  commandComponents = process.argv.slice(2)
 } else {
   console.error("Please either created a \"request.curl\" or pass command as an argument")
   return
