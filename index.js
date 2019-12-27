@@ -37,16 +37,16 @@ const loadCountryItinerary = async ({ country }) => {
   const response = await fetch("https://www.skyscanner.ru/g/conductor/v1/fps3/search/?geo_schema=skyscanner&carrier_schema=skyscanner&response_include=query%3Bdeeplink%3Bsegment%3Bstats%3Bfqs%3Bpqs", countryGeoOptions)
   if (response.status >= 400) {
     const text = await response.text()
+    if (text.includes('captcha')) {
+      console.log("Skyscanner is requesting you to pass a captcha, please reload the page, wait for captcha to appear (might take several seconds) and then run the script again")
+      process.exit()
+    }
     throw new Error(`Bad response from server: ${response.status}, ${text}`);
   }
   const json = await response.json()
-  // console.log(json)
   const sessionId = json.context.session_id
   const requestId = json.context.request_id
   const itineraries = await loadItineraries({ sessionId, requestId, country })
-  // console.log(itineraries.length)
-  // console.log(_.sortBy(itineraries, (i) => i.score).map(i => i.score))
-  // console.log(_.sortBy(itineraries, (i) => i.score).map(i => i.pricing_options[0].price.amount))
   const bestItinerary = _.sortBy(itineraries, (i) => -i.score)[0]
   if (!bestItinerary) {
     return null
@@ -68,7 +68,7 @@ const loadItineraries = async ({ sessionId, requestId, country }) => {
     setTimeout(resolve, 1000)
   })
 
-  const promises = [2, 10].map(async (i) => {
+  const promises = [0, 10].map(async (i) => {
     await new Promise((resolve) => {
       setTimeout(resolve, 1000 * i)
     })
@@ -78,18 +78,21 @@ const loadItineraries = async ({ sessionId, requestId, country }) => {
 
     const options = {"credentials":"include","headers": headers,"referrer":"https://www.skyscanner.ru/transport/flights/kuf/prg/191231/200106/?adults=1&children=0&adultsv2=1&childrenv2=&infants=0&cabinclass=economy&rtn=1&preferdirects=false&outboundaltsenabled=false&inboundaltsenabled=false&market=RU&locale=en-US&currency=USD","referrerPolicy":"no-referrer-when-downgrade","body":null,"method":"GET","mode":"cors"}
 
-    // console.log({ i, sessionId, requestId, country })
-    // console.log(url)
-    // console.log(options)
     const response = await fetch(url, options);
     if (response.status >= 400) {
       const text = await response.text()
       const errorMessage = `Bad response from server: ${response.status}, ${text}`
+      if (text.includes('captcha')) {
+        console.log("Skyscanner is requesting you to pass a captcha, please reload the page, wait for captcha to appear (might take several seconds) and then run the script again")
+        process.exit()
+      }
+      if (text.includes("Session not found in state")) {
+        console.log("A temporary error has occurred, try again")
+        process.exit()
+      }
       console.log(errorMessage)
       console.log(url)
-      // console.log(headers)
       return
-      // throw new Error(errorMessage)
     }
     result = await response.json()
   })
