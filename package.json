@@ -13,6 +13,6 @@
     "country-code-lookup": "^0.0.15",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.15",
-    "shell-quote": "^1.7.2"
+    "shell-quote": "^1.7.3"
   }
 }
